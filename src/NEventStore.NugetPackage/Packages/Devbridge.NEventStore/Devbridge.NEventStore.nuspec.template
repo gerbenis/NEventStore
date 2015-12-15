@@ -1,0 +1,16 @@
+﻿<?xml version="1.0"?>
+<package >
+    <metadata>
+        <id>Devbridge.NEventStore</id>
+        <version>@NEventStoreVersion@</version>
+        <authors>Devbridge Group</authors>
+        <owners>Devbridge Group</owners>
+        <licenseUrl>http://www.devbrige.com</licenseUrl>
+        <projectUrl>http://www.devbrige.com</projectUrl>
+        <iconUrl>http://www.devbrige.com</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Devbridge NEventStore</description>
+        <releaseNotes>Devbridge NEventStore @NEventStoreVersion@</releaseNotes>
+        <copyright>Copyright 2016</copyright>
+    </metadata>
+</package>
