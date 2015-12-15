@@ -1,21 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3FE594FE-16FF-4405-97D5-5A58FB12520B}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{09A3E8CD-FF4D-4824-B67C-A1C3482AF3B9}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NEventStore.Persistence.AcceptanceTests</RootNamespace>
-    <AssemblyName>NEventStore.Persistence.AcceptanceTests</AssemblyName>
+    <RootNamespace>NEventStore.NugetPackage</RootNamespace>
+    <AssemblyName>NEventStore.NugetPackage</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -26,6 +25,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -35,40 +35,22 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentAssertions">
-      <HintPath>..\packages\FluentAssertions.3.3.0\lib\net40\FluentAssertions.dll</HintPath>
-    </Reference>
-    <Reference Include="FluentAssertions.Core">
-      <HintPath>..\packages\FluentAssertions.3.3.0\lib\net40\FluentAssertions.Core.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\xunit.1.9.1\lib\net20\xunit.dll</HintPath>
-    </Reference>
-    <Reference Include="xunit.should, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\xunit.should.1.1\lib\net35\xunit.should.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BDD\SpecificationBase.cs" />
-    <Compile Include="BDD\SpecificationBaseRunner.cs" />
-    <Compile Include="Catch.cs" />
-    <Compile Include="ConfigurationExtensions.cs" />
-    <Compile Include="EnviromentConnectionFactory.cs" />
-    <Compile Include="ExtensionMethods.cs" />
+      <Compile Include="..\SharedAssemblyInfo.cs">
+          <Link>Properties\AssemblyInfo.cs</Link>
+      </Compile>
+    <None Include="app.config" />
+    <None Include="Packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec.template" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleMessage.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NEventStore\NEventStore.csproj">
@@ -77,7 +59,26 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>rmdir "$(ProjectDir)$(OutDir)packages"
+rmdir "$(ProjectDir)bin\deployment"
+
+mkdir "$(ProjectDir)$(OutDir)packages"
+mkdir "$(ProjectDir)bin\deployment"
+
+rem --- Creating Devbridge.NEventStore package -------------------------------------------------------------------------------
+mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore"
+mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\content"
+mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\content\net40"
+mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\lib"
+mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\lib\net40"
+
+xcopy "$(ProjectDir)$(OutDir)NEventStore.dll" "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\lib\net40\" /Y /Q
+
+"$(ProjectDir)$(OutDir)NEventStore.NugetPackage.exe" "$(ProjectDir)Packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec.template" "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec"
+"$(SolutionDir).nuget\nuget.exe" pack "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec" -OutputDirectory "$(ProjectDir)bin\deployment" -NoPackageAnalysis
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
