@@ -44,9 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-      <Compile Include="..\SharedAssemblyInfo.cs">
-          <Link>Properties\AssemblyInfo.cs</Link>
-      </Compile>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
     <None Include="app.config" />
     <None Include="Packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec.template" />
     <Compile Include="Program.cs" />
@@ -60,23 +60,23 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>rmdir "$(ProjectDir)$(OutDir)packages"
-rmdir "$(ProjectDir)bin\deployment"
+    <PostBuildEvent>rd /S /Q "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages"
+rd /S /Q "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\deployment"
 
-mkdir "$(ProjectDir)$(OutDir)packages"
-mkdir "$(ProjectDir)bin\deployment"
+mkdir "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages"
+mkdir "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\deployment"
 
 rem --- Creating Devbridge.NEventStore package -------------------------------------------------------------------------------
-mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore"
-mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\content"
-mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\content\net40"
-mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\lib"
-mkdir "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\lib\net40"
+mkdir "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages\Devbridge.NEventStore"
+mkdir "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages\Devbridge.NEventStore\content"
+mkdir "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages\Devbridge.NEventStore\content\net40"
+mkdir "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages\Devbridge.NEventStore\lib"
+mkdir "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages\Devbridge.NEventStore\lib\net40"
 
-xcopy "$(ProjectDir)$(OutDir)NEventStore.dll" "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\lib\net40\" /Y /Q
+xcopy "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\NEventStore.dll" "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages\Devbridge.NEventStore\lib\net40\" /Y /Q
 
-"$(ProjectDir)$(OutDir)NEventStore.NugetPackage.exe" "$(ProjectDir)Packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec.template" "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec"
-"$(SolutionDir).nuget\nuget.exe" pack "$(ProjectDir)$(OutDir)packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec" -OutputDirectory "$(ProjectDir)bin\deployment" -NoPackageAnalysis
+"C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\NEventStore.NugetPackage.exe" "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\Packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec.template" "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec"
+"C:\Web\Internal Tools\NEventStore\src\.nuget\nuget.exe" pack "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\Debug\packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec" -OutputDirectory "C:\Web\Internal Tools\NEventStore\src\NEventStore.NugetPackage\bin\deployment" -NoPackageAnalysis
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
