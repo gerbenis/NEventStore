@@ -44,9 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\SharedAssemblyInfo.cs">
-      <Link>Properties\AssemblyInfo.cs</Link>
-    </Compile>
     <None Include="app.config" />
     <None Include="Packages\Devbridge.NEventStore\Devbridge.NEventStore.nuspec.template" />
     <Compile Include="Program.cs" />
