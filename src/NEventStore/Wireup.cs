@@ -24,7 +24,7 @@ namespace NEventStore
             _inner = inner;
         }
 
-        protected NanoContainer Container
+        public NanoContainer Container
         {
             get { return _container ?? _inner.Container; }
         }
