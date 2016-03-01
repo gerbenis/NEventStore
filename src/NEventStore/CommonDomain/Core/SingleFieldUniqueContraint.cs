@@ -8,9 +8,9 @@ namespace NEventStore.CommonDomain.Core
 
     public class MultiFieldsUniqueConstraint : IUniqueContraint
     {
-        public string UniquePayload { get; }
+        public string UniquePayload { get; private set; }
 
-        public string UniqueConstraintName { get; }
+        public string UniqueConstraintName { get; private set; }
 
         public MultiFieldsUniqueConstraint(params IUniqueContraint[] uniqueContraints)
         {
@@ -30,9 +30,9 @@ namespace NEventStore.CommonDomain.Core
 
     public class SingleFieldUniqueContraint : IUniqueContraint
     {
-        public string UniquePayload { get; }
+        public string UniquePayload { get; private set; }
 
-        public string UniqueConstraintName { get; }
+        public string UniqueConstraintName { get; private set; }
 
         public SingleFieldUniqueContraint(string fieldName, object value)
         {
