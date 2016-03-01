@@ -118,7 +118,32 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="InitializeStorage" xml:space="preserve">
-    <value>IF EXISTS(SELECT * FROM sysobjects WHERE name='Commits' AND xtype = 'U') RETURN;
+    <value>
+IF EXISTS(SELECT * FROM sysobjects WHERE name='Constraints' AND xtype = 'U') RETURN;
+CREATE TABLE [dbo].[Constraints](
+	[BucketId] [varchar](40) NOT NULL,
+	[StreamId] [char](40) NOT NULL,
+	[UniquePayload] [varchar](800) NOT NULL,
+	[UniqueConstraintName] [varchar](60) NOT NULL,
+ CONSTRAINT [PK_Constraints] PRIMARY KEY CLUSTERED 
+(
+	[BucketId] ASC,
+	[StreamId] ASC,
+	[UniqueConstraintName] ASC
+),
+ CONSTRAINT [UC_Constraints_UniquePayload] UNIQUE NONCLUSTERED 
+(
+	[UniquePayload] ASC,
+	[BucketId] ASC,
+	[UniqueConstraintName] ASC
+)
+) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_Constraints_BucketId] ON [dbo].[Constraints] ([BucketId] ASC);
+CREATE NONCLUSTERED INDEX [IX_Constraints_StreamId] ON [dbo].[Constraints] ([StreamId] ASC);
+CREATE NONCLUSTERED INDEX [IX_Constraints_BucketId_StreamId] ON [dbo].[Constraints] ([BucketId] ASC, [StreamId] ASC);
+
+IF EXISTS(SELECT * FROM sysobjects WHERE name='Commits' AND xtype = 'U') RETURN;
 CREATE TABLE [dbo].[Commits]
 (
        [BucketId] [varchar](40) NOT NULL,
@@ -166,10 +191,74 @@ SELECT *
                  AND @Limit + @Skip;</value>
   </data>
   <data name="PersistCommits" xml:space="preserve">
-    <value>INSERT
-  INTO Commits
-     ( BucketId, StreamId, StreamIdOriginal, CommitId, CommitSequence, StreamRevision, Items, CommitStamp, Headers, Payload )
-OUTPUT INSERTED.CheckpointNumber
-VALUES (@BucketId, @StreamId, @StreamIdOriginal, @CommitId, @CommitSequence, @StreamRevision, @Items, @CommitStamp, @Headers, @Payload);</value>
+    <value>SET NOCOUNT ON;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+BEGIN TRANSACTION CommitTran;
+BEGIN TRY
+	IF (@UniquePayload0 IS NOT NULL)
+	BEGIN
+		   UPDATE Constraints
+		   SET UniquePayload = @UniquePayload0
+		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName0 AND StreamId = @StreamId;
+
+       IF @@rowcount = 0
+		   BEGIN
+              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload0, @UniqueConstraintName0);
+       END
+	END
+  
+	IF (@UniquePayload1 IS NOT NULL)
+	BEGIN
+			print 1;
+		print @UniqueConstraintName1;
+		print @UniquePayload1;
+		   UPDATE Constraints
+		   SET UniquePayload = @UniquePayload1
+		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName1 AND StreamId = @StreamId;
+
+       IF @@rowcount = 0
+		   BEGIN
+              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload1, @UniqueConstraintName1);
+       END
+	END
+  
+  IF (@UniquePayload2 IS NOT NULL)
+	BEGIN
+			print 2;
+		print @UniqueConstraintName2;
+		print @UniquePayload2;
+		   UPDATE Constraints
+		   SET UniquePayload = @UniquePayload2
+		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName2 AND StreamId = @StreamId;
+
+       IF @@rowcount = 0
+		   BEGIN
+              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload2, @UniqueConstraintName2);
+       END
+	END
+  
+  IF (@UniquePayload3 IS NOT NULL)
+	BEGIN
+		   UPDATE Constraints
+		   SET UniquePayload = @UniquePayload3
+		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName3 AND StreamId = @StreamId;
+
+       IF @@rowcount = 0
+		   BEGIN
+              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload3, @UniqueConstraintName3);
+       END
+	END
+  
+	INSERT INTO Commits (BucketId, StreamId, StreamIdOriginal, CommitId, CommitSequence, StreamRevision, Items, CommitStamp, Headers, Payload)
+	OUTPUT INSERTED.CheckpointNumber
+	VALUES (@BucketId, @StreamId, @StreamIdOriginal, @CommitId, @CommitSequence, @StreamRevision, @Items, @CommitStamp, @Headers, @Payload);
+
+	COMMIT TRANSACTION CommitTran;
+END TRY
+BEGIN CATCH  
+   ROLLBACK TRANSACTION CommitTran;
+   THROW;
+END CATCH
+    </value>
   </data>
 </root>

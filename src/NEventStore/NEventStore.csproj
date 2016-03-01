@@ -69,21 +69,25 @@
     <Compile Include="CommonDomain\Core\AggregateBase.cs" />
     <Compile Include="CommonDomain\Core\ConflictDetector.cs" />
     <Compile Include="CommonDomain\Core\ConventionEventRouter.cs" />
+    <Compile Include="CommonDomain\Core\EmptyEventTypeBridge.cs" />
     <Compile Include="CommonDomain\Core\ExtensionMethods.cs" />
     <Compile Include="CommonDomain\Core\HandlerForDomainEventNotFoundException.cs" />
     <Compile Include="CommonDomain\Core\RegistrationEventRouter.cs" />
     <Compile Include="CommonDomain\Core\SagaBase.cs" />
+    <Compile Include="CommonDomain\Core\SingleFieldUniqueContraint.cs" />
     <Compile Include="CommonDomain\IAggregate.cs" />
     <Compile Include="CommonDomain\IDetectConflicts.cs" />
     <Compile Include="CommonDomain\IMemento.cs" />
     <Compile Include="CommonDomain\IRouteEvents.cs" />
     <Compile Include="CommonDomain\ISaga.cs" />
+    <Compile Include="CommonDomain\IUniqueContraint.cs" />
     <Compile Include="CommonDomain\Persistence\ConflictingCommandException.cs" />
     <Compile Include="CommonDomain\Persistence\EventStore\EventStoreRepository.cs" />
     <Compile Include="CommonDomain\Persistence\EventStore\ExceptionMessages.Designer.cs" />
     <Compile Include="CommonDomain\Persistence\EventStore\SagaEventStoreRepository.cs" />
     <Compile Include="CommonDomain\Persistence\IConstructAggregates.cs" />
     <Compile Include="CommonDomain\Persistence\IConstructSagas.cs" />
+    <Compile Include="CommonDomain\Persistence\IEventTypeBridge.cs" />
     <Compile Include="CommonDomain\Persistence\IRepository.cs" />
     <Compile Include="CommonDomain\Persistence\ISagaRepository.cs" />
     <Compile Include="CommonDomain\Persistence\PersistenceException.cs" />
@@ -134,10 +138,13 @@
     <Compile Include="OptimisticPipelineHook.cs" />
     <Compile Include="PersistenceWireup.cs" />
     <Compile Include="PersistenceWireupExtensions.cs" />
+    <Compile Include="Persistence\AggregateFactory.cs" />
+    <Compile Include="Persistence\AggregateNotFoundException.cs" />
     <Compile Include="Persistence\Commit.cs" />
     <Compile Include="Persistence\InMemory\InMemoryPersistenceEngine.cs" />
     <Compile Include="Persistence\InMemory\InMemoryPersistenceFactory.cs" />
     <Compile Include="Persistence\IStreamHead.cs" />
+    <Compile Include="Persistence\MissingAggregateConstructorException.cs" />
     <Compile Include="Persistence\PersistStreamsExtensions.cs" />
     <Compile Include="Persistence\PipelineHooksAwarePersistanceDecorator.cs" />
     <Compile Include="Persistence\Sql\CommitExtensions.cs" />
@@ -166,9 +173,9 @@
     <Compile Include="Persistence\Sql\SqlDialects\DelimitedDbStatement.cs" />
     <Compile Include="Persistence\Sql\SqlDialects\MsSqlDialect.cs" />
     <Compile Include="Persistence\Sql\SqlDialects\MsSqlStatements.Designer.cs">
-      <DependentUpon>MsSqlStatements.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+      <DependentUpon>MsSqlStatements.resx</DependentUpon>
     </Compile>
     <Compile Include="Persistence\Sql\SqlDialects\MySqlDialect.cs" />
     <Compile Include="Persistence\Sql\SqlDialects\MySqlStatements.Designer.cs">
@@ -201,6 +208,7 @@
     <Compile Include="Persistence\Sql\SqlPersistenceFactory.cs" />
     <Compile Include="Persistence\Sql\StreamHeadExtensions.cs" />
     <Compile Include="Persistence\Sql\ThreadScope.cs" />
+    <Compile Include="Persistence\Sql\UniqueConstraintViolationException.cs" />
     <Compile Include="Persistence\Sql\UniqueKeyViolationException.cs" />
     <Compile Include="Persistence\StorageUnavailableException.cs" />
     <Compile Include="Persistence\StreamHeadEqualityComparer.cs" />
@@ -304,8 +312,8 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Persistence\Sql\SqlDialects\MsSqlStatements.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MsSqlStatements.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>MsSqlStatements.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Persistence\Sql\SqlDialects\MySqlStatements.resx">
       <Generator>ResXFileCodeGenerator</Generator>

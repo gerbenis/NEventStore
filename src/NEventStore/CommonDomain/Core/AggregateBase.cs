@@ -70,6 +70,11 @@ namespace CommonDomain.Core
 			return snapshot;
 		}
 
+	    IUniqueContraint[] IAggregate.GetUniqueContraints()
+	    {
+	        return GetUniqueContraints();
+	    }
+
 		public virtual bool Equals(IAggregate other)
 		{
 			return null != other && other.Id == this.Id;
@@ -91,7 +96,12 @@ namespace CommonDomain.Core
 			return null;
 		}
 
-		public override int GetHashCode()
+        protected virtual IUniqueContraint[] GetUniqueContraints()
+        {
+            return null;
+        }
+
+        public override int GetHashCode()
 		{
 			return this.Id.GetHashCode();
 		}

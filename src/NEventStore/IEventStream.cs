@@ -2,6 +2,7 @@ namespace NEventStore
 {
     using System;
     using System.Collections.Generic;
+    using global::CommonDomain;
     using NEventStore.Persistence;
 
     /// <summary>
@@ -66,6 +67,8 @@ namespace NEventStore
         /// <exception cref="StorageException" />
         /// <exception cref="StorageUnavailableException" />
         void CommitChanges(Guid commitId);
+
+        void CommitChanges(Guid commitId, IUniqueContraint[] uniqueContraintsToValidate);
 
         /// <summary>
         ///     Clears the uncommitted changes.

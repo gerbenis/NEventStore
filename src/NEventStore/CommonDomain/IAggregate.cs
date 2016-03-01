@@ -13,5 +13,7 @@ namespace CommonDomain
 		void ClearUncommittedEvents();
 
 		IMemento GetSnapshot();
+
+	    IUniqueContraint[] GetUniqueContraints();
 	}
 }

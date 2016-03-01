@@ -1,10 +1,12 @@
 ﻿namespace CommonDomain
 {
 	using System;
-
+	using System.Linq;
 	using global::CommonDomain.Core;
+	using NEventStore.CommonDomain.Core;
+    using NEventStore.CommonDomain.Core;
 
-	internal class TestAggregate : AggregateBase
+    internal class TestAggregate : AggregateBase
 	{
 		private TestAggregate(Guid id)
 		{
@@ -33,6 +35,15 @@
 		{
 			this.Name = @event.Name;
 		}
+
+	    protected override IUniqueContraint[] GetUniqueContraints()
+	    {
+	        return new IUniqueContraint[]
+	        {
+	            new SingleFieldUniqueContraint("Name", Name),
+                new MultiFieldsUniqueConstraint(new SingleFieldUniqueContraint("Id", Id), new SingleFieldUniqueContraint("Name", Name)) 
+	        };
+	    }
 	}
 
 	public interface IDomainEvent

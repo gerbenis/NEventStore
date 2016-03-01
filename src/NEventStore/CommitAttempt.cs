@@ -4,6 +4,7 @@ namespace NEventStore
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using global::CommonDomain;
 
     public class CommitAttempt
     {
@@ -15,6 +16,7 @@ namespace NEventStore
         private readonly DateTime _commitStamp;
         private readonly IDictionary<string, object> _headers;
         private readonly ICollection<EventMessage> _events;
+        private readonly IList<IUniqueContraint> _uniqueContraints;
 
         /// <summary>
         ///     Initializes a new instance of the Commit class for the default bucket.
@@ -58,6 +60,18 @@ namespace NEventStore
             : this(Bucket.Default, streamId, streamRevision, commitId, commitSequence, commitStamp, headers, events)
         {}
 
+        public CommitAttempt(
+            string bucketId,
+            string streamId,
+            int streamRevision,
+            Guid commitId,
+            int commitSequence,
+            DateTime commitStamp,
+            IDictionary<string, object> headers,
+            IEnumerable<EventMessage> events) : this(bucketId, streamId, streamRevision, commitId, commitSequence, commitStamp, headers, events, null)
+        {
+            
+        }
         /// <summary>
         ///     Initializes a new instance of the Commit class.
         /// </summary>
@@ -77,7 +91,8 @@ namespace NEventStore
             int commitSequence,
             DateTime commitStamp,
             IDictionary<string, object> headers,
-            IEnumerable<EventMessage> events)
+            IEnumerable<EventMessage> events,
+            IEnumerable<IUniqueContraint> uniqueContraints)
         {
             //TODO write tests for these?
             Guard.NotNullOrWhiteSpace(() => bucketId, bucketId);
@@ -98,6 +113,9 @@ namespace NEventStore
             _events = events == null ?
                 new ReadOnlyCollection<EventMessage>(new List<EventMessage>()) :
                 new ReadOnlyCollection<EventMessage>(events.ToList());
+            _uniqueContraints = uniqueContraints == null
+                ? new ReadOnlyCollection<IUniqueContraint>(new List<IUniqueContraint>())
+                : new ReadOnlyCollection<IUniqueContraint>(uniqueContraints.ToList());
         }
 
         /// <summary>
@@ -164,6 +182,14 @@ namespace NEventStore
             get
             {
                 return _events;
+            }
+        }
+
+        public IList<IUniqueContraint> UniqueContraints
+        {
+            get
+            {
+                return _uniqueContraints;
             }
         }
     }

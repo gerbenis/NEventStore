@@ -4,6 +4,7 @@ namespace NEventStore
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using global::CommonDomain;
     using NEventStore.Logging;
 
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix",
@@ -84,6 +85,11 @@ namespace NEventStore
 
         public void CommitChanges(Guid commitId)
         {
+            CommitChanges(commitId, null);
+        }
+
+        public void CommitChanges(Guid commitId, IUniqueContraint[] uniqueContraintsToValidate)
+        {
             Logger.Debug(Resources.AttemptingToCommitChanges, StreamId);
 
             if (_identifiers.Contains(commitId))
@@ -98,7 +104,7 @@ namespace NEventStore
 
             try
             {
-                PersistChanges(commitId);
+                PersistChanges(commitId, uniqueContraintsToValidate);
             }
             catch (ConcurrencyException)
             {
@@ -181,9 +187,9 @@ namespace NEventStore
             return false;
         }
 
-        private void PersistChanges(Guid commitId)
+        private void PersistChanges(Guid commitId, IUniqueContraint[] uniqueContraintsToValidate)
         {
-            CommitAttempt attempt = BuildCommitAttempt(commitId);
+            CommitAttempt attempt = BuildCommitAttempt(commitId, uniqueContraintsToValidate);
 
             Logger.Debug(Resources.PersistingCommit, commitId, StreamId);
             ICommit commit = _persistence.Commit(attempt);
@@ -192,7 +198,7 @@ namespace NEventStore
             ClearChanges();
         }
 
-        private CommitAttempt BuildCommitAttempt(Guid commitId)
+        private CommitAttempt BuildCommitAttempt(Guid commitId, IUniqueContraint[] uniqueContraintsToValidate)
         {
             Logger.Debug(Resources.BuildingCommitAttempt, commitId, StreamId);
             return new CommitAttempt(
@@ -203,7 +209,8 @@ namespace NEventStore
                 CommitSequence + 1,
                 SystemTime.UtcNow,
                 _uncommittedHeaders.ToDictionary(x => x.Key, x => x.Value),
-                _events.ToList());
+                _events.ToList(),
+                uniqueContraintsToValidate);
         }
 
         public void Dispose()

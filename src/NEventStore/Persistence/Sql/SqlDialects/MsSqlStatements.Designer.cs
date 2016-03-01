@@ -61,16 +61,23 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to IF EXISTS(SELECT * FROM sysobjects WHERE name=&apos;Commits&apos; AND xtype = &apos;U&apos;) RETURN;
-        ///CREATE TABLE [dbo].[Commits]
+        ///   Looks up a localized string similar to 
+        ///IF EXISTS(SELECT * FROM sysobjects WHERE name=&apos;Constraints&apos; AND xtype = &apos;U&apos;) RETURN;
+        ///CREATE TABLE [dbo].[Constraints](
+        ///	[BucketId] [varchar](40) NOT NULL,
+        ///	[StreamId] [char](40) NOT NULL,
+        ///	[UniquePayload] [varchar](800) NOT NULL,
+        ///	[UniqueConstraintName] [varchar](60) NOT NULL,
+        /// CONSTRAINT [PK_Constraints] PRIMARY KEY CLUSTERED 
         ///(
-        ///       [BucketId] [varchar](40) NOT NULL,
-        ///       [StreamId] [char](40) NOT NULL,
-        ///       [StreamIdOriginal] [nvarchar](1000) NOT NULL,
-        ///       [StreamRevision] [int] NOT NULL CHECK ([StreamRevision] &gt; 0),
-        ///       [Items] [int] NOT NULL CHECK ([Items] &gt; 0),
-        ///       [CommitId] [uniqueidentifier] NOT NULL CHECK ([CommitId] != 0x0),
-        ///       [CommitSequence] [int] NOT NULL CHECK ([CommitSequence] &gt; [rest of string was truncated]&quot;;.
+        ///	[BucketId] ASC,
+        ///	[StreamId] ASC,
+        ///	[UniqueConstraintName] ASC
+        ///),
+        /// CONSTRAINT [UC_Constraints_UniquePayload] UNIQUE NONCLUSTERED 
+        ///(
+        ///	[UniquePayload] ASC,
+        ///	[BucketId [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string InitializeStorage {
             get {
@@ -94,11 +101,19 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to INSERT
-        ///  INTO Commits
-        ///     ( BucketId, StreamId, StreamIdOriginal, CommitId, CommitSequence, StreamRevision, Items, CommitStamp, Headers, Payload )
-        ///OUTPUT INSERTED.CheckpointNumber
-        ///VALUES (@BucketId, @StreamId, @StreamIdOriginal, @CommitId, @CommitSequence, @StreamRevision, @Items, @CommitStamp, @Headers, @Payload);.
+        ///   Looks up a localized string similar to SET NOCOUNT ON;
+        ///SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+        ///BEGIN TRANSACTION CommitTran;
+        ///BEGIN TRY
+        ///	IF (@UniquePayload0 IS NOT NULL)
+        ///	BEGIN
+        ///		   UPDATE Constraints
+        ///		   SET UniquePayload = @UniquePayload0
+        ///		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName0 AND StreamId = @StreamId;
+        ///
+        ///       IF @@rowcount = 0
+        ///		   BEGIN
+        ///              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload0, @Uni [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string PersistCommits {
             get {

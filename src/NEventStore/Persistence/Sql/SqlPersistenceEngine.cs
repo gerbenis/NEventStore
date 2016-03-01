@@ -7,6 +7,7 @@ namespace NEventStore.Persistence.Sql
     using System.Linq;
     using System.Threading;
     using System.Transactions;
+    using global::CommonDomain;
     using NEventStore.Logging;
     using NEventStore.Serialization;
 
@@ -326,11 +327,47 @@ namespace NEventStore.Persistence.Sql
         protected virtual void OnPersistCommit(IDbStatement cmd, CommitAttempt attempt)
         { }
 
+        protected virtual void AddUniquePayloadParameters(CommitAttempt attempt, IDbStatement cmd)
+        {
+            if (attempt.UniqueContraints.Count > 4)
+            {
+                throw new StorageException("NEventStore can't store more than 4 unique constraints per aggregate.");
+            }
+
+            var uniqueConstraintNameList = new object[4];
+            var uniquePayloadList = new object[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (attempt.UniqueContraints != null && i < attempt.UniqueContraints.Count)
+                {
+                    uniqueConstraintNameList[i] = attempt.UniqueContraints[i].UniqueConstraintName;
+                    uniquePayloadList[i] = attempt.UniqueContraints[i].UniquePayload;
+                }
+                
+                if (uniquePayloadList[i] == null)
+                {
+                    uniqueConstraintNameList[i] = DBNull.Value;
+                    uniquePayloadList[i] = DBNull.Value;
+                }
+            }
+
+            cmd.AddParameter(_dialect.UniqueConstraintName0, uniqueConstraintNameList[0], DbType.AnsiString);
+            cmd.AddParameter(_dialect.UniqueConstraintName1, uniqueConstraintNameList[1], DbType.AnsiString);
+            cmd.AddParameter(_dialect.UniqueConstraintName2, uniqueConstraintNameList[2], DbType.AnsiString);
+            cmd.AddParameter(_dialect.UniqueConstraintName3, uniqueConstraintNameList[3], DbType.AnsiString);
+
+            cmd.AddParameter(_dialect.UniquePayload0, uniquePayloadList[0], DbType.AnsiString);
+            cmd.AddParameter(_dialect.UniquePayload1, uniquePayloadList[1], DbType.AnsiString);
+            cmd.AddParameter(_dialect.UniquePayload2, uniquePayloadList[2], DbType.AnsiString);
+            cmd.AddParameter(_dialect.UniquePayload3, uniquePayloadList[3], DbType.AnsiString);
+        }
+
         private ICommit PersistCommit(CommitAttempt attempt)
         {
             Logger.Debug(Messages.AttemptingToCommit, attempt.Events.Count, attempt.StreamId, attempt.CommitSequence, attempt.BucketId);
             string streamId = _streamIdHasher.GetHash(attempt.StreamId);
-            return ExecuteCommand((connection, cmd) =>
+            return ExecuteCommandUnsafe((connection, cmd) =>
             {
                 cmd.AddParameter(_dialect.BucketId, attempt.BucketId, DbType.AnsiString);
                 cmd.AddParameter(_dialect.StreamId, streamId, DbType.AnsiString);
@@ -341,9 +378,15 @@ namespace NEventStore.Persistence.Sql
                 cmd.AddParameter(_dialect.CommitSequence, attempt.CommitSequence);
                 cmd.AddParameter(_dialect.CommitStamp, attempt.CommitStamp);
                 cmd.AddParameter(_dialect.Headers, _serializer.Serialize(attempt.Headers));
+
+                AddUniquePayloadParameters(attempt, cmd);
+
                 _dialect.AddPayloadParamater(_connectionFactory, connection, cmd, _serializer.Serialize(attempt.Events.ToList()));
+
                 OnPersistCommit(cmd, attempt);
+
                 var checkpointNumber = cmd.ExecuteScalar(_dialect.PersistCommit).ToLong();
+                
                 return new Commit(
                     attempt.BucketId,
                     attempt.StreamId,
@@ -438,6 +481,35 @@ namespace NEventStore.Persistence.Sql
         private T ExecuteCommand<T>(Func<IDbStatement, T> command)
         {
             return ExecuteCommand((_, statement) => command(statement));
+        }
+
+        protected virtual T ExecuteCommandUnsafe<T>(Func<IDbConnection, IDbStatement, T> command)
+        {
+            ThrowWhenDisposed();
+
+            using (IDbConnection connection = _connectionFactory.Open())
+            using (IDbStatement statement = _dialect.BuildStatement(null, connection, null))
+            {
+                try
+                {
+                    Logger.Verbose(Messages.ExecutingCommand);
+                    T rowsAffected = command(connection, statement);
+                    Logger.Verbose(Messages.CommandExecuted, rowsAffected);
+
+                    return rowsAffected;
+                }
+                catch (Exception e)
+                {
+                    Logger.Debug(Messages.StorageThrewException, e.GetType());
+                    if (!RecoverableException(e))
+                    {
+                        throw new StorageException(e.Message, e);
+                    }
+
+                    Logger.Info(Messages.RecoverableExceptionCompletesScope);
+                    throw;
+                }
+            }
         }
 
         protected virtual T ExecuteCommand<T>(Func<IDbConnection, IDbStatement, T> command)

@@ -40,6 +40,11 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             }
             catch (Exception e)
             {
+                if (Dialect.IsUniqueConstraintViolation(e))
+                {
+                    throw new UniqueConstraintViolationException(e.Message, e);
+                }
+
                 if (Dialect.IsDuplicate(e))
                 {
                     throw new UniqueKeyViolationException(e.Message, e);

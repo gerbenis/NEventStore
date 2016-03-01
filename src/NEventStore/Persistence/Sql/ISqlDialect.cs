@@ -34,6 +34,14 @@ namespace NEventStore.Persistence.Sql
         string MaxStreamRevision { get; }
         string Items { get; }
         string CommitId { get; }
+        string UniqueConstraintName0 { get; }
+        string UniqueConstraintName1 { get; }
+        string UniqueConstraintName2 { get; }
+        string UniqueConstraintName3 { get; }
+        string UniquePayload0 { get; }
+        string UniquePayload1 { get; }
+        string UniquePayload2 { get; }
+        string UniquePayload3 { get; }
         string CommitSequence { get; }
         string CommitStamp { get; }
         string CommitStampStart { get; }
@@ -63,5 +71,7 @@ namespace NEventStore.Persistence.Sql
         DateTime ToDateTime(object value);
 
         NextPageDelegate NextPageDelegate { get; }
+
+        bool IsUniqueConstraintViolation(Exception e);
     }
 }

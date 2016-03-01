@@ -3,11 +3,15 @@ namespace NEventStore
     using System.Collections.Generic;
     using System.Linq;
     using System.Transactions;
+    using CommonDomain;
+    using CommonDomain.Core;
+    using global::CommonDomain.Core;
     using NEventStore.Conversion;
     using NEventStore.Dispatcher;
     using NEventStore.Persistence;
     using NEventStore.Persistence.InMemory;
     using NEventStore.Serialization;
+    using IEventTypeBridge = global::CommonDomain.IEventTypeBridge;
 
     public class Wireup
     {
@@ -37,6 +41,8 @@ namespace NEventStore
             container.Register<IPersistStreams>(new InMemoryPersistenceEngine());
             container.Register<IScheduleDispatches>(new NullDispatcher());
             container.Register<ISerialize>(new JsonSerializer());
+            container.Register<IEventTypeBridge>(new EmptyEventTypeBridge());
+
             container.Register(BuildEventStore);
 
             return new Wireup(container);

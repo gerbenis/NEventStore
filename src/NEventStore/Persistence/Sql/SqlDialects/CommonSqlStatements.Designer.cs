@@ -87,7 +87,8 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         
         /// <summary>
         ///   Looks up a localized string similar to DELETE FROM Snapshots WHERE BucketId =@BucketId AND StreamId = @StreamId;
-        ///DELETE FROM Commits WHERE BucketId = @BucketId AND StreamId = @StreamId;.
+        ///DELETE FROM Commits WHERE BucketId = @BucketId AND StreamId = @StreamId;
+        ///DELETE FROM Constraints WHERE BucketId = @BucketId AND StreamId = @StreamId;.
         /// </summary>
         internal static string DeleteStream {
             get {
@@ -97,7 +98,8 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         
         /// <summary>
         ///   Looks up a localized string similar to DROP TABLE Snapshots;
-        ///DROP TABLE Commits;.
+        ///DROP TABLE Commits;
+        ///DROP TABLE Constraints;.
         /// </summary>
         internal static string DropTables {
             get {
@@ -252,7 +254,8 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         
         /// <summary>
         ///   Looks up a localized string similar to DELETE FROM Snapshots WHERE BucketId = @BucketId;
-        ///DELETE FROM Commits WHERE BucketId = @BucketId;.
+        ///DELETE FROM Commits WHERE BucketId = @BucketId;
+        ///DELETE FROM Constraints WHERE BucketId = @BucketId;.
         /// </summary>
         internal static string PurgeBucket {
             get {
@@ -262,7 +265,8 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         
         /// <summary>
         ///   Looks up a localized string similar to DELETE FROM Snapshots;
-        ///DELETE FROM Commits;.
+        ///DELETE FROM Commits;
+        ///DELETE FROM Constraints;.
         /// </summary>
         internal static string PurgeStorage {
             get {

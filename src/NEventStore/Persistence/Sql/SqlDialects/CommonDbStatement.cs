@@ -3,6 +3,7 @@ namespace NEventStore.Persistence.Sql.SqlDialects
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Data.SqlClient;
     using System.Transactions;
     using NEventStore.Logging;
     using NEventStore.Persistence.Sql;
@@ -75,6 +76,11 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             }
             catch (Exception e)
             {
+                if (_dialect.IsUniqueConstraintViolation(e))
+                {
+                    throw new UniqueConstraintViolationException(e.Message, e);
+                }
+
                 if (_dialect.IsDuplicate(e))
                 {
                     throw new UniqueKeyViolationException(e.Message, e);
@@ -95,10 +101,16 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             }
             catch (Exception e)
             {
+                if (_dialect.IsUniqueConstraintViolation(e))
+                {
+                    throw new UniqueConstraintViolationException(e.Message, e);
+                }
+
                 if (_dialect.IsDuplicate(e))
                 {
                     throw new UniqueKeyViolationException(e.Message, e);
                 }
+
                 throw;
             }
         }

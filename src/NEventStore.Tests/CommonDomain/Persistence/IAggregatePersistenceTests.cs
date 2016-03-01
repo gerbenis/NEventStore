@@ -22,7 +22,7 @@
 		protected override void Context()
 		{
 			this._storeEvents = Wireup.Init().UsingInMemoryPersistence().Build();
-			this._repository = new EventStoreRepository(this._storeEvents, new AggregateFactory(), new ConflictDetector());
+			this._repository = new EventStoreRepository(this._storeEvents, new AggregateFactory(), new ConflictDetector(), new EmptyEventTypeBridge());
 		}
 	}
 
@@ -155,8 +155,8 @@
             base.Context();
 
             this._storeEvents = Wireup.Init().UsingInMemoryPersistence().Build();
-            this._repository1 = new EventStoreRepository(this._storeEvents, new AggregateFactory(), new ConflictDetector());
-            this._repository2 = new EventStoreRepository(this._storeEvents, new AggregateFactory(), new ConflictDetector());
+            this._repository1 = new EventStoreRepository(this._storeEvents, new AggregateFactory(), new ConflictDetector(), new EmptyEventTypeBridge());
+            this._repository2 = new EventStoreRepository(this._storeEvents, new AggregateFactory(), new ConflictDetector(), new EmptyEventTypeBridge());
 
             _aggregateId = Guid.NewGuid();
             var aggregate = new TestAggregate(_aggregateId, "my name is..");
