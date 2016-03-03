@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <package >
     <metadata>
         <id>Devbridge.NEventStore</id>
@@ -12,5 +12,8 @@
         <description>Devbridge NEventStore</description>
         <releaseNotes>Devbridge NEventStore @NEventStoreVersion@</releaseNotes>
         <copyright>Copyright 2016</copyright>
+		<dependencies>
+			<dependency id="Newtonsoft.Json" version="8.0.0" />
+		</dependencies>
     </metadata>
 </package>
