@@ -24,7 +24,7 @@
         {
             eventsStore.Dispose();
         }
- 
+
         [Fact]
         public void CanSaveNewAggregateWithUniqueFields()
         {

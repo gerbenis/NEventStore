@@ -70,6 +70,7 @@
     <Compile Include="..\NEventStore.Persistence.AcceptanceTests\PersistenceTests.cs">
       <Link>PersistenceTests.cs</Link>
     </Compile>
+    <Compile Include="ConcurrencyCheckTests.cs" />
     <Compile Include="UniqueTestAggregate2.cs" />
     <Compile Include="UniqueTestAggregateRenamed.cs" />
     <Compile Include="UniqueTestAggregateDeleted.cs" />
