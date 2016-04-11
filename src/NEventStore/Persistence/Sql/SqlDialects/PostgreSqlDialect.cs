@@ -19,6 +19,14 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return PostgreSqlStatements.PersistCommits; }
         }
 
+        public override string PersistUniqueContraint
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public override string GetUndispatchedCommits
         {
             get { return base.GetUndispatchedCommits.Replace("0", "false"); }

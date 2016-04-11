@@ -17,6 +17,14 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return MySqlStatements.PersistCommit; }
         }
 
+        public override string PersistUniqueContraint
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public override string AppendSnapshotToCommit
         {
             get { return base.AppendSnapshotToCommit.Replace("/*FROM DUAL*/", "FROM DUAL"); }

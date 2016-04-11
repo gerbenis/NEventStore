@@ -46,6 +46,8 @@ namespace NEventStore.Persistence.Sql.SqlDialects
 
         public abstract string PersistCommit { get; }
 
+        public abstract string PersistUniqueContraint { get; }
+
         public virtual string DuplicateCommit
         {
             get { return CommonSqlStatements.DuplicateCommit; }
@@ -111,47 +113,17 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return "@CommitId"; }
         }
 
-        public virtual string UniqueConstraintName0
+        public virtual string UniqueConstraintName
         {
-            get { return "@UniqueConstraintName0"; }
+            get { return "@UniqueConstraintName"; }
         }
 
-        public virtual string UniqueConstraintName1
+        public virtual string UniquePayload
         {
-            get { return "@UniqueConstraintName1"; }
+            get { return "@UniquePayload"; }
         }
 
-        public virtual string UniqueConstraintName2
-        {
-            get { return "@UniqueConstraintName2"; }
-        }
-
-        public virtual string UniqueConstraintName3
-        {
-            get { return "@UniqueConstraintName3"; }
-        }
-
-        public virtual string UniquePayload0
-        {
-            get { return "@UniquePayload0"; }
-        }
-
-        public virtual string UniquePayload1
-        {
-            get { return "@UniquePayload1"; }
-        }
-
-        public virtual string UniquePayload2
-        {
-            get { return "@UniquePayload2"; }
-        }
-
-        public virtual string UniquePayload3
-        {
-            get { return "@UniquePayload3"; }
-        }
-
-        public virtual string CommitSequence
+       public virtual string CommitSequence
         {
             get { return "@CommitSequence"; }
         }

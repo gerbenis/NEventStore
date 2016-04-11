@@ -30,7 +30,7 @@
         {
             var number = DateTime.UtcNow.Ticks.ToString();
             var name = "name" + DateTime.UtcNow.Ticks;
-            var aggregateId = SaveUniqueTestAggregate(number, name, false);
+            var aggregateId = SaveUniqueTestAggregate(Guid.NewGuid(), number, name, false);
 
             using (var repository = CreateRepository())
             {
@@ -47,17 +47,32 @@
         {
             var number = DateTime.UtcNow.Ticks.ToString();
             var name = "name" + DateTime.UtcNow.Ticks;
-            SaveUniqueTestAggregate(number, name, false);
+
+            SaveUniqueTestAggregate(Guid.NewGuid(), number, name, false);
+
+            Guid secondAggregateId = Guid.NewGuid();
 
             try
             {
-                SaveUniqueTestAggregate(number, name, false);
+                SaveUniqueTestAggregate(secondAggregateId, number, name, false);
 
                 Assert.True(false, "An exception should be thrown after new an aggregate with the same name is saved.");
             }
             catch (PersistenceException e)
             {
-                Assert.Contains("Constraints", e.Message);              
+                Assert.Contains("Constraints", e.Message);
+            }
+
+            using (var repository = CreateRepository())
+            {
+                try
+                {
+                    var agg = repository.GetById<UniqueTestAggregate>(secondAggregateId);
+                    Assert.True(agg == null, string.Format("The unique constraints engine failed. Aggregate id={0} was created.", secondAggregateId));
+                }
+                catch (AggregateNotFoundException)
+                {
+                }
             }
         }
 
@@ -66,11 +81,11 @@
         {
             var number1 = DateTime.UtcNow.Ticks.ToString();
             var name1 = "name" + DateTime.UtcNow.Ticks;
-            var id1 = SaveUniqueTestAggregate(number1, name1, false);
+            var id1 = SaveUniqueTestAggregate(Guid.NewGuid(), number1, name1, false);
 
             var number2 = DateTime.UtcNow.Ticks.ToString();
             var name2 = "name" + DateTime.UtcNow.Ticks;
-            var id2 = SaveUniqueTestAggregate(number2, name2, false);
+            var id2 = SaveUniqueTestAggregate(Guid.NewGuid(), number2, name2, false);
 
             using (var repository = CreateRepository())
             {
@@ -95,11 +110,11 @@
         {
             var number1 = Guid.NewGuid().ToString();
             var name1 = "name" + Guid.NewGuid();
-            var id1 = SaveUniqueTestAggregate(number1, name1, true);
+            var id1 = SaveUniqueTestAggregate(Guid.NewGuid(), number1, name1, true);
 
             var number2 = Guid.NewGuid().ToString();
             var name2 = "name" + Guid.NewGuid();
-            var id2 = SaveUniqueTestAggregate(number2, name2, false);
+            var id2 = SaveUniqueTestAggregate(Guid.NewGuid(), number2, name2, false);
 
             using (var repository = CreateRepository())
             {
@@ -117,11 +132,11 @@
         }
 
         [Fact]
-        public void WillFailToSaveAggregateAsItViolates4UCLimit()
+        public void ShouldSaveAggregateWithWith6UC()
         {
             using (var repository = CreateRepository())
             {
-                UniqueTestAggregate2 agg = new UniqueTestAggregate2(new Guid(), "test1", "name1");
+                UniqueTestAggregate2 agg = new UniqueTestAggregate2(Guid.NewGuid(), "test1", "name1");
 
                 Assert.Throws<PersistenceException>(() =>
                 {
@@ -130,7 +145,7 @@
             }
         }
 
-        private Guid SaveUniqueTestAggregate(string number, string name, bool isDeleted, IRepository repositoryToUse = null)
+        private Guid SaveUniqueTestAggregate(Guid id, string number, string name, bool isDeleted, IRepository repositoryToUse = null)
         {
             IRepository repository = null;
 
@@ -138,7 +153,7 @@
             {
                 repository = repositoryToUse ?? CreateRepository();
 
-                var aggregateToSave = new UniqueTestAggregate(Guid.NewGuid(), number, name);
+                var aggregateToSave = new UniqueTestAggregate(id, number, name);
 
                 if (isDeleted)
                 {

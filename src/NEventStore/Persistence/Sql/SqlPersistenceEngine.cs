@@ -327,77 +327,62 @@ namespace NEventStore.Persistence.Sql
         protected virtual void OnPersistCommit(IDbStatement cmd, CommitAttempt attempt)
         { }
 
-        protected virtual void AddUniquePayloadParameters(CommitAttempt attempt, IDbStatement cmd)
-        {
-            if (attempt.UniqueContraints.Count > 4)
-            {
-                throw new StorageException("NEventStore can't store more than 4 unique constraints per aggregate.");
-            }
-
-            var uniqueConstraintNameList = new object[4];
-            var uniquePayloadList = new object[4];
-
-            for (int i = 0; i < 4; i++)
-            {
-                if (attempt.UniqueContraints != null && i < attempt.UniqueContraints.Count)
-                {
-                    uniqueConstraintNameList[i] = attempt.UniqueContraints[i].UniqueConstraintName;
-                    uniquePayloadList[i] = attempt.UniqueContraints[i].UniquePayload;
-                }
-                
-                if (uniquePayloadList[i] == null)
-                {
-                    uniqueConstraintNameList[i] = DBNull.Value;
-                    uniquePayloadList[i] = DBNull.Value;
-                }
-            }
-
-            cmd.AddParameter(_dialect.UniqueConstraintName0, uniqueConstraintNameList[0], DbType.AnsiString);
-            cmd.AddParameter(_dialect.UniqueConstraintName1, uniqueConstraintNameList[1], DbType.AnsiString);
-            cmd.AddParameter(_dialect.UniqueConstraintName2, uniqueConstraintNameList[2], DbType.AnsiString);
-            cmd.AddParameter(_dialect.UniqueConstraintName3, uniqueConstraintNameList[3], DbType.AnsiString);
-
-            cmd.AddParameter(_dialect.UniquePayload0, uniquePayloadList[0], DbType.AnsiString);
-            cmd.AddParameter(_dialect.UniquePayload1, uniquePayloadList[1], DbType.AnsiString);
-            cmd.AddParameter(_dialect.UniquePayload2, uniquePayloadList[2], DbType.AnsiString);
-            cmd.AddParameter(_dialect.UniquePayload3, uniquePayloadList[3], DbType.AnsiString);
-        }
-
         private ICommit PersistCommit(CommitAttempt attempt)
         {
             Logger.Debug(Messages.AttemptingToCommit, attempt.Events.Count, attempt.StreamId, attempt.CommitSequence, attempt.BucketId);
             string streamId = _streamIdHasher.GetHash(attempt.StreamId);
-            return ExecuteCommandUnsafe((connection, cmd) =>
+
+            var uniqueConstraintCommands = new List<Action<IDbConnection, IDbStatement>>();
+
+            foreach (var uniqueContraintAttempt in attempt.UniqueContraints)
             {
-                cmd.AddParameter(_dialect.BucketId, attempt.BucketId, DbType.AnsiString);
-                cmd.AddParameter(_dialect.StreamId, streamId, DbType.AnsiString);
-                cmd.AddParameter(_dialect.StreamIdOriginal, attempt.StreamId);
-                cmd.AddParameter(_dialect.StreamRevision, attempt.StreamRevision);
-                cmd.AddParameter(_dialect.Items, attempt.Events.Count);
-                cmd.AddParameter(_dialect.CommitId, attempt.CommitId);
-                cmd.AddParameter(_dialect.CommitSequence, attempt.CommitSequence);
-                cmd.AddParameter(_dialect.CommitStamp, attempt.CommitStamp);
-                cmd.AddParameter(_dialect.Headers, _serializer.Serialize(attempt.Headers));
+                uniqueConstraintCommands.Add((connection, cmd) =>
+                {
+                    var uniqueConstraintName = uniqueContraintAttempt.UniqueConstraintName;
+                    var uniquePayload = uniqueContraintAttempt.UniquePayload;
 
-                AddUniquePayloadParameters(attempt, cmd);
+                    cmd.AddParameter(_dialect.BucketId, attempt.BucketId, DbType.AnsiString);
+                    cmd.AddParameter(_dialect.StreamId, streamId, DbType.AnsiString);
+                    cmd.AddParameter(_dialect.UniquePayload, uniquePayload, DbType.AnsiString);
+                    cmd.AddParameter(_dialect.UniqueConstraintName, uniqueConstraintName, DbType.AnsiString);
 
-                _dialect.AddPayloadParamater(_connectionFactory, connection, cmd, _serializer.Serialize(attempt.Events.ToList()));
+                    cmd.ExecuteNonQuery(_dialect.PersistUniqueContraint);
+                });
+            }
 
-                OnPersistCommit(cmd, attempt);
+            return
+                ExecuteCommand(
+                    (connection, cmd) =>
+                    {
+                        cmd.AddParameter(_dialect.BucketId, attempt.BucketId, DbType.AnsiString);
+                        cmd.AddParameter(_dialect.StreamId, streamId, DbType.AnsiString);
+                        cmd.AddParameter(_dialect.StreamIdOriginal, attempt.StreamId);
+                        cmd.AddParameter(_dialect.StreamRevision, attempt.StreamRevision);
+                        cmd.AddParameter(_dialect.Items, attempt.Events.Count);
+                        cmd.AddParameter(_dialect.CommitId, attempt.CommitId);
+                        cmd.AddParameter(_dialect.CommitSequence, attempt.CommitSequence);
+                        cmd.AddParameter(_dialect.CommitStamp, attempt.CommitStamp);
+                        cmd.AddParameter(_dialect.Headers, _serializer.Serialize(attempt.Headers));
 
-                var checkpointNumber = cmd.ExecuteScalar(_dialect.PersistCommit).ToLong();
-                
-                return new Commit(
-                    attempt.BucketId,
-                    attempt.StreamId,
-                    attempt.StreamRevision,
-                    attempt.CommitId,
-                    attempt.CommitSequence,
-                    attempt.CommitStamp,
-                    checkpointNumber.ToString(CultureInfo.InvariantCulture),
-                    attempt.Headers,
-                    attempt.Events);
-            });
+                        _dialect.AddPayloadParamater(_connectionFactory, connection, cmd,
+                            _serializer.Serialize(attempt.Events.ToList()));
+
+                        OnPersistCommit(cmd, attempt);
+
+                        var checkpointNumber = cmd.ExecuteScalar(_dialect.PersistCommit).ToLong();
+
+                        return new Commit(
+                            attempt.BucketId,
+                            attempt.StreamId,
+                            attempt.StreamRevision,
+                            attempt.CommitId,
+                            attempt.CommitSequence,
+                            attempt.CommitStamp,
+                            checkpointNumber.ToString(CultureInfo.InvariantCulture),
+                            attempt.Headers,
+                            attempt.Events);
+                    },
+                    uniqueConstraintCommands.ToArray());
         }
 
         private bool DetectDuplicate(CommitAttempt attempt)
@@ -483,77 +468,58 @@ namespace NEventStore.Persistence.Sql
             return ExecuteCommand((_, statement) => command(statement));
         }
 
-        protected virtual T ExecuteCommandUnsafe<T>(Func<IDbConnection, IDbStatement, T> command)
-        {
-            ThrowWhenDisposed();
-
-            using (IDbConnection connection = _connectionFactory.Open())
-            using (IDbStatement statement = _dialect.BuildStatement(null, connection, null))
-            {
-                try
-                {
-                    Logger.Verbose(Messages.ExecutingCommand);
-                    T rowsAffected = command(connection, statement);
-                    Logger.Verbose(Messages.CommandExecuted, rowsAffected);
-
-                    return rowsAffected;
-                }
-                catch (Exception e)
-                {
-                    Logger.Debug(Messages.StorageThrewException, e.GetType());
-                    if (!RecoverableException(e))
-                    {
-                        throw new StorageException(e.Message, e);
-                    }
-
-                    Logger.Info(Messages.RecoverableExceptionCompletesScope);
-                    throw;
-                }
-            }
-        }
-
-        protected virtual T ExecuteCommand<T>(Func<IDbConnection, IDbStatement, T> command)
+        protected virtual T ExecuteCommand<T>(Func<IDbConnection, IDbStatement, T> resultCommand, params Action<IDbConnection, IDbStatement>[] commands)
         {
             ThrowWhenDisposed();
 
             using (TransactionScope scope = OpenCommandScope())
             using (IDbConnection connection = _connectionFactory.Open())
             using (IDbTransaction transaction = _dialect.OpenTransaction(connection))
-            using (IDbStatement statement = _dialect.BuildStatement(scope, connection, transaction))
             {
-                try
+                using (IDbStatement statement = _dialect.BuildStatement(scope, connection, transaction))
                 {
-                    Logger.Verbose(Messages.ExecutingCommand);
-                    T rowsAffected = command(connection, statement);
-                    Logger.Verbose(Messages.CommandExecuted, rowsAffected);
-
-                    if (transaction != null)
+                    try
                     {
-                        transaction.Commit();
-                    }
+                       
+                        foreach (var command in commands)
+                        {
+                            Logger.Verbose("Executing addition command.");
+                            command(connection, statement);
+                            Logger.Verbose("Addition command executed.");
+                        }
 
-                    if (scope != null)
+                        Logger.Verbose(Messages.ExecutingCommand);
+                        T rowsAffected  = resultCommand(connection, statement);
+                        Logger.Verbose(Messages.CommandExecuted, rowsAffected);
+
+                        if (transaction != null)
+                        {
+                            transaction.Commit();
+                        }
+
+                        if (scope != null)
+                        {
+                            scope.Complete();
+                        }
+
+                        return rowsAffected;
+                    }
+                    catch (Exception e)
                     {
-                        scope.Complete();
-                    }
+                        Logger.Debug(Messages.StorageThrewException, e.GetType());
+                        if (!RecoverableException(e))
+                        {
+                            throw new StorageException(e.Message, e);
+                        }
 
-                    return rowsAffected;
-                }
-                catch (Exception e)
-                {
-                    Logger.Debug(Messages.StorageThrewException, e.GetType());
-                    if (!RecoverableException(e))
-                    {
-                        throw new StorageException(e.Message, e);
-                    }
+                        Logger.Info(Messages.RecoverableExceptionCompletesScope);
+                        if (scope != null)
+                        {
+                            scope.Complete();
+                        }
 
-                    Logger.Info(Messages.RecoverableExceptionCompletesScope);
-                    if (scope != null)
-                    {
-                        scope.Complete();
+                        throw;
                     }
-
-                    throw;
                 }
             }
         }

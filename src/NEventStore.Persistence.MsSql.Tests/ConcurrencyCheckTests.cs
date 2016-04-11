@@ -61,7 +61,10 @@
                 agg1.ChangeName("#3" + name);
 
                 // It should fail as aggregate updated to #2 name and the agg1 has older version.
-                SaveTestAggregate(agg1, repository);
+                Assert.Throws<ConflictingCommandException>(() =>
+                {
+                    SaveTestAggregate(agg1, repository);
+                });
 
                 agg3 = repository.GetById<UniqueTestAggregate>(original.Id);
                 Assert.Equal(agg2.Name, agg3.Name);

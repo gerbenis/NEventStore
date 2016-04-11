@@ -101,23 +101,33 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SET NOCOUNT ON;
-        ///SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-        ///BEGIN TRANSACTION CommitTran;
-        ///BEGIN TRY
-        ///	IF (@UniquePayload0 IS NOT NULL)
-        ///	BEGIN
-        ///		   UPDATE Constraints
-        ///		   SET UniquePayload = @UniquePayload0
-        ///		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName0 AND StreamId = @StreamId;
-        ///
-        ///       IF @@rowcount = 0
-        ///		   BEGIN
-        ///              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload0, @Uni [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to 
+        ///	INSERT INTO Commits (BucketId, StreamId, StreamIdOriginal, CommitId, CommitSequence, StreamRevision, Items, CommitStamp, Headers, Payload)
+        ///	OUTPUT INSERTED.CheckpointNumber
+        ///	VALUES (@BucketId, @StreamId, @StreamIdOriginal, @CommitId, @CommitSequence, @StreamRevision, @Items, @CommitStamp, @Headers, @Payload);
+        ///    .
         /// </summary>
         internal static string PersistCommits {
             get {
                 return ResourceManager.GetString("PersistCommits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///		   UPDATE Constraints
+        ///		   SET UniquePayload = @UniquePayload
+        ///		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName AND StreamId = @StreamId;
+        ///
+        ///       IF @@rowcount = 0
+        ///		   BEGIN
+        ///          INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload, @UniqueConstraintName);
+        ///       END
+        ///	.
+        /// </summary>
+        internal static string PersistUniqueConstraint {
+            get {
+                return ResourceManager.GetString("PersistUniqueConstraint", resourceCulture);
             }
         }
     }

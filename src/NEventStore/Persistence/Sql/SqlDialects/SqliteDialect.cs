@@ -20,6 +20,14 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return SqliteStatements.PersistCommit; }
         }
 
+        public override string PersistUniqueContraint
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public override bool IsDuplicate(Exception exception)
         {
             string message = exception.Message.ToUpperInvariant();

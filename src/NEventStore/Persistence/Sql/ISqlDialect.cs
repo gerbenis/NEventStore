@@ -18,6 +18,7 @@ namespace NEventStore.Persistence.Sql
         string GetCommitsFromToInstant { get; }
 
         string PersistCommit { get; }
+        string PersistUniqueContraint { get; }
         string DuplicateCommit { get; }
 
         string GetStreamsRequiringSnapshots { get; }
@@ -34,14 +35,8 @@ namespace NEventStore.Persistence.Sql
         string MaxStreamRevision { get; }
         string Items { get; }
         string CommitId { get; }
-        string UniqueConstraintName0 { get; }
-        string UniqueConstraintName1 { get; }
-        string UniqueConstraintName2 { get; }
-        string UniqueConstraintName3 { get; }
-        string UniquePayload0 { get; }
-        string UniquePayload1 { get; }
-        string UniquePayload2 { get; }
-        string UniquePayload3 { get; }
+        string UniqueConstraintName { get; }
+        string UniquePayload { get; }
         string CommitSequence { get; }
         string CommitStamp { get; }
         string CommitStampStart { get; }

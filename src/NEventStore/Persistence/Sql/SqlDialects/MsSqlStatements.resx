@@ -190,75 +190,25 @@ SELECT *
  WHERE [row] BETWEEN @Skip + 1
                  AND @Limit + @Skip;</value>
   </data>
+  
+  <data name="PersistUniqueConstraint" xml:space="preserve">
+    <value>
+		   UPDATE Constraints
+		   SET UniquePayload = @UniquePayload
+		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName AND StreamId = @StreamId;
+
+       IF @@rowcount = 0
+		   BEGIN
+          INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload, @UniqueConstraintName);
+       END
+	</value>
+  </data>
+  
   <data name="PersistCommits" xml:space="preserve">
-    <value>SET NOCOUNT ON;
-SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-BEGIN TRANSACTION CommitTran;
-BEGIN TRY
-	IF (@UniquePayload0 IS NOT NULL)
-	BEGIN
-		   UPDATE Constraints
-		   SET UniquePayload = @UniquePayload0
-		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName0 AND StreamId = @StreamId;
-
-       IF @@rowcount = 0
-		   BEGIN
-              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload0, @UniqueConstraintName0);
-       END
-	END
-  
-	IF (@UniquePayload1 IS NOT NULL)
-	BEGIN
-			print 1;
-		print @UniqueConstraintName1;
-		print @UniquePayload1;
-		   UPDATE Constraints
-		   SET UniquePayload = @UniquePayload1
-		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName1 AND StreamId = @StreamId;
-
-       IF @@rowcount = 0
-		   BEGIN
-              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload1, @UniqueConstraintName1);
-       END
-	END
-  
-  IF (@UniquePayload2 IS NOT NULL)
-	BEGIN
-			print 2;
-		print @UniqueConstraintName2;
-		print @UniquePayload2;
-		   UPDATE Constraints
-		   SET UniquePayload = @UniquePayload2
-		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName2 AND StreamId = @StreamId;
-
-       IF @@rowcount = 0
-		   BEGIN
-              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload2, @UniqueConstraintName2);
-       END
-	END
-  
-  IF (@UniquePayload3 IS NOT NULL)
-	BEGIN
-		   UPDATE Constraints
-		   SET UniquePayload = @UniquePayload3
-		   WHERE BucketId = @BucketId AND UniqueConstraintName = @UniqueConstraintName3 AND StreamId = @StreamId;
-
-       IF @@rowcount = 0
-		   BEGIN
-              INSERT INTO Constraints (BucketId, StreamId, UniquePayload, UniqueConstraintName) values (@BucketId, @StreamId, @UniquePayload3, @UniqueConstraintName3);
-       END
-	END
-  
+    <value>
 	INSERT INTO Commits (BucketId, StreamId, StreamIdOriginal, CommitId, CommitSequence, StreamRevision, Items, CommitStamp, Headers, Payload)
 	OUTPUT INSERTED.CheckpointNumber
 	VALUES (@BucketId, @StreamId, @StreamIdOriginal, @CommitId, @CommitSequence, @StreamRevision, @Items, @CommitStamp, @Headers, @Payload);
-
-	COMMIT TRANSACTION CommitTran;
-END TRY
-BEGIN CATCH  
-   ROLLBACK TRANSACTION CommitTran;
-   THROW;
-END CATCH
     </value>
   </data>
 </root>

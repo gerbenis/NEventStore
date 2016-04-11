@@ -54,7 +54,7 @@ namespace NEventStore.Persistence.AcceptanceTests
             {
                 new SingleFieldUniqueContraint("Number", Number),
                 new MultiFieldsUniqueConstraint(
-                    new SingleFieldUniqueContraint("Name", Name),  
+                    new SingleFieldUniqueContraint("Name", Name),
                     new SingleFieldUniqueContraint("IsDeleted", IsDeleted))
             };
         }

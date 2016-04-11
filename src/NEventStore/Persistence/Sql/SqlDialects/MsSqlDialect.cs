@@ -38,6 +38,11 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return MsSqlStatements.PersistCommits; }
         }
 
+        public override string PersistUniqueContraint
+        {
+            get { return MsSqlStatements.PersistUniqueConstraint; }
+        }
+
         public override string GetCommitsFromCheckpoint
         {
             get { return CommonTableExpressionPaging(base.GetCommitsFromCheckpoint); }

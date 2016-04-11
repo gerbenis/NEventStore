@@ -106,6 +106,14 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return OracleNativeStatements.PersistCommit; }
         }
 
+        public override string PersistUniqueContraint
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public override string PurgeStorage
         {
             get { return OracleNativeStatements.PurgeStorage; }
