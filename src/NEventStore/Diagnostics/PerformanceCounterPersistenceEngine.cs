@@ -56,6 +56,16 @@ namespace NEventStore.Diagnostics
             return _persistence.GetUndispatchedCommits();
         }
 
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start)
+        {
+            return _persistence.GetUniqueStreamIds(bucketId, start);
+        }
+
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end)
+        {
+            return _persistence.GetUniqueStreamIds(bucketId, start, end);
+        }
+
         public IEnumerable<ICommit> GetFrom(string bucketId, string streamId, int minRevision, int maxRevision)
         {
             return _persistence.GetFrom(bucketId, streamId, minRevision, maxRevision);

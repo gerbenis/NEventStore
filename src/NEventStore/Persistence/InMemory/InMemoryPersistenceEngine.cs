@@ -88,6 +88,18 @@ namespace NEventStore.Persistence.InMemory
             return _buckets.Values.SelectMany(b => b.GetUndispatchedCommits());
         }
 
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start)
+        {
+            ThrowWhenDisposed();
+            return this[bucketId].GetUniqueStreamIds(start);
+        }
+
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end)
+        {
+            ThrowWhenDisposed();
+            return this[bucketId].GetUniqueStreamIds(start, end);
+        }
+
         public void MarkCommitAsDispatched(ICommit commit)
         {
             ThrowWhenDisposed();
@@ -364,6 +376,35 @@ namespace NEventStore.Persistence.InMemory
                 int numberToTake = endingCommitIndex - startingCommitIndex + 1;
 
                 return _commits.Skip(_commits.IndexOf(startingCommit)).Take(numberToTake);
+            }
+
+            public IEnumerable<string> GetUniqueStreamIds(DateTime start)
+            {
+                Guid commitId = _stamps.Where(x => x.Value >= start).Select(x => x.Key).FirstOrDefault();
+                if (commitId == Guid.Empty)
+                {
+                    return Enumerable.Empty<string>();
+                }
+                InMemoryCommit startingCommit = _commits.FirstOrDefault(x => x.CommitId == commitId);
+                return _commits.Select(x => x.StreamId).Skip(_commits.IndexOf(startingCommit)).Distinct();
+            }
+
+            public IEnumerable<string> GetUniqueStreamIds(DateTime start, DateTime end)
+            {
+                IEnumerable<Guid> selectedCommitIds = _stamps.Where(x => x.Value >= start && x.Value < end).Select(x => x.Key).ToArray();
+                Guid firstCommitId = selectedCommitIds.FirstOrDefault();
+                Guid lastCommitId = selectedCommitIds.LastOrDefault();
+                if (firstCommitId == Guid.Empty)
+                {
+                    return Enumerable.Empty<string>();
+                }
+                InMemoryCommit startingCommit = _commits.FirstOrDefault(x => x.CommitId == firstCommitId);
+                InMemoryCommit endingCommit = _commits.FirstOrDefault(x => x.CommitId == lastCommitId);
+
+                int startingCommitIndex = (startingCommit == null) ? 0 : _commits.IndexOf(startingCommit);
+                int endingCommitIndex = (endingCommit == null) ? _commits.Count - 1 : _commits.IndexOf(endingCommit);
+                int numberToTake = endingCommitIndex - startingCommitIndex + 1;
+                return _commits.Select(x => x.StreamId).Skip(_commits.IndexOf(startingCommit)).Take(numberToTake);
             }
 
             public ICommit Commit(CommitAttempt attempt, ICheckpoint checkpoint)

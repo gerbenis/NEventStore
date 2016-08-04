@@ -25,6 +25,9 @@ namespace NEventStore.Persistence.Sql
         string GetSnapshot { get; }
         string AppendSnapshotToCommit { get; }
 
+        string GetUniqueStreamIdsFrom { get; }
+        string GetUniqueStreamIdsFromTo { get; }
+
         string GetUndispatchedCommits { get; }
         string MarkCommitAsDispatched { get; }
 

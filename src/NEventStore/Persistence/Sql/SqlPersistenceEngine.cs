@@ -191,6 +191,31 @@ namespace NEventStore.Persistence.Sql
                     .ToArray(); // avoid paging
         }
 
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start)
+        {
+            return ExecuteQuery(
+                query =>
+                {
+                    string statement = _dialect.GetUniqueStreamIdsFrom;
+                    query.AddParameter(_dialect.BucketId, bucketId, DbType.AnsiString);
+                    query.AddParameter(_dialect.CommitStampStart, start);
+                    return query.ExecutePagedQuery(statement, (q, s) => { }).Select(x => x.GetString(0));
+                });
+        }
+
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end)
+        {
+            return ExecuteQuery(
+                query =>
+                {
+                    string statement = _dialect.GetUniqueStreamIdsFromTo;
+                    query.AddParameter(_dialect.BucketId, bucketId, DbType.AnsiString);
+                    query.AddParameter(_dialect.CommitStampStart, start);
+                    query.AddParameter(_dialect.CommitStampEnd, end);
+                    return query.ExecutePagedQuery(statement, (q, s) => { }).Select(x => x.StreamId());
+                });
+        }
+
         public virtual void MarkCommitAsDispatched(ICommit commit)
         {
             Logger.Debug(Messages.MarkingCommitAsDispatched, commit.CommitId);

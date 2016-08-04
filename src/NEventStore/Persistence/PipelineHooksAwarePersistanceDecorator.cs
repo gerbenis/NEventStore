@@ -90,6 +90,16 @@ namespace NEventStore.Persistence
             return ExecuteHooks(_original.GetUndispatchedCommits());
         }
 
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start)
+        {
+            return _original.GetUniqueStreamIds(bucketId, start);
+        }
+
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end)
+        {
+            return _original.GetUniqueStreamIds(bucketId, start, end);
+        }
+
         public void MarkCommitAsDispatched(ICommit commit)
         {
             _original.MarkCommitAsDispatched(commit);

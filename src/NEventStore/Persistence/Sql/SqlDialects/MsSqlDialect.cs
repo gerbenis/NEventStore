@@ -63,6 +63,11 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return NaturalPaging(base.GetStreamsRequiringSnapshots); }
         }
 
+        public override string GetUniqueStreamIdsFrom
+        {
+            get { return CommonTableExpressionPaging(base.GetUniqueStreamIdsFrom); }
+        }
+
         private static string NaturalPaging(string query)
         {
             return "SET ROWCOUNT @Limit;\n" + RemovePaging(query);

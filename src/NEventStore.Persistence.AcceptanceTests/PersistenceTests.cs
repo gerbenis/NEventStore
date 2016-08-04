@@ -10,6 +10,9 @@ namespace NEventStore.Persistence.AcceptanceTests
     using System.Threading;
     using System.Threading.Tasks;
     using System.Transactions;
+
+    using FluentAssertions.Common;
+
     using NEventStore.Diagnostics;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
@@ -970,6 +973,43 @@ namespace NEventStore.Persistence.AcceptanceTests
         public void Should_have_expected_number_of_commits()
         {
             _commits.Length.ShouldBe(_moreThanPageSize);
+        }
+    }
+
+    public class when_getting_unique_stream_ids : PersistenceEngineConcern
+    {
+        private List<string> _streamIds;
+
+        private string bucketId = "bucket";
+
+        private Guid streamId;
+        protected override void Context()
+        {
+            streamId = Guid.NewGuid();
+            var commitA = streamId.ToString().BuildAttempt(bucketId: bucketId, now: new DateTime(2016, 01, 01));
+            var commitB = commitA.BuildNextAttempt();
+            var commitC = commitB.BuildNextAttempt();
+            Persistence.Commit(commitA);
+            Persistence.Commit(commitB);
+            Persistence.Commit(commitC);
+        }
+
+        protected override void Because()
+        {
+            _streamIds = base.Persistence.GetUniqueStreamIds(bucketId, new DateTime(2016, 01, 01)).ToList();
+        }
+
+        [Fact]
+        public void should_not_contain_duplicates()
+        {
+            var distinctCount = _streamIds.Distinct().Count();
+            _streamIds.Count.IsSameOrEqualTo(distinctCount);
+        }
+
+        [Fact]
+        public void should_not_be_empty()
+        {
+            _streamIds.ShouldNotBeEmpty();
         }
     }
 

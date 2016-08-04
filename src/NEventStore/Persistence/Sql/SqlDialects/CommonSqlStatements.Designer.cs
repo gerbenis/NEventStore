@@ -240,6 +240,32 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT DISTINCT StreamId  FROM Commits
+        /// WHERE BucketId = @BucketId
+        ///   AND CommitStamp &gt;= @CommitStampStart
+        /// ORDER BY StreamId
+        /// LIMIT @Limit OFFSET @Skip;.
+        /// </summary>
+        internal static string GetUniqueStreamIdsFrom {
+            get {
+                return ResourceManager.GetString("GetUniqueStreamIdsFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT DISTINCT StreamId  FROM Commits
+        /// WHERE BucketId = @BucketId
+        ///   AND CommitStamp &gt;= @CommitStampStart
+        ///   AND CommitStamp &lt; @CommitStampEnd ORDER BY StreamId
+        /// LIMIT @Limit OFFSET @Skip;.
+        /// </summary>
+        internal static string GetUniqueStreamIdsFromTo {
+            get {
+                return ResourceManager.GetString("GetUniqueStreamIdsFromTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UPDATE Commits
         ///   SET Dispatched = 1
         /// WHERE BucketId = @BucketId

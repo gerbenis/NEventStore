@@ -68,6 +68,16 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return CommonSqlStatements.AppendSnapshotToCommit; }
         }
 
+        public virtual string GetUniqueStreamIdsFrom
+        {
+            get { return CommonSqlStatements.GetUniqueStreamIdsFrom; }
+        }
+
+        public string GetUniqueStreamIdsFromTo
+        {
+            get { return CommonSqlStatements.GetUniqueStreamIdsFromTo; }
+        }
+
         public virtual string GetUndispatchedCommits
         {
             get { return CommonSqlStatements.GetUndispatchedCommits; }
