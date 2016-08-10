@@ -242,14 +242,14 @@ DELETE FROM Commits WHERE BucketId = @BucketId AND StreamId = @StreamId;
 DELETE FROM Constraints WHERE BucketId = @BucketId AND StreamId = @StreamId;</value>
   </data>
   <data name="GetUniqueStreamIdsFrom" xml:space="preserve">
-    <value>SELECT DISTINCT StreamId  FROM Commits
+    <value>SELECT DISTINCT StreamIdOriginal  FROM Commits
  WHERE BucketId = @BucketId
    AND CommitStamp &gt;= @CommitStampStart
  ORDER BY StreamId
  LIMIT @Limit OFFSET @Skip;</value>
   </data>
   <data name="GetUniqueStreamIdsFromTo" xml:space="preserve">
-    <value>SELECT DISTINCT StreamId  FROM Commits
+    <value>SELECT DISTINCT StreamIdOriginal  FROM Commits
  WHERE BucketId = @BucketId
    AND CommitStamp &gt;= @CommitStampStart
    AND CommitStamp &lt; @CommitStampEnd ORDER BY StreamId

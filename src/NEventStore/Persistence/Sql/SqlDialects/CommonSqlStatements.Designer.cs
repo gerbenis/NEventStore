@@ -240,7 +240,7 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT DISTINCT StreamId  FROM Commits
+        ///   Looks up a localized string similar to SELECT DISTINCT StreamIdOriginal  FROM Commits
         /// WHERE BucketId = @BucketId
         ///   AND CommitStamp &gt;= @CommitStampStart
         /// ORDER BY StreamId
@@ -253,7 +253,7 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT DISTINCT StreamId  FROM Commits
+        ///   Looks up a localized string similar to SELECT DISTINCT StreamIdOriginal  FROM Commits
         /// WHERE BucketId = @BucketId
         ///   AND CommitStamp &gt;= @CommitStampStart
         ///   AND CommitStamp &lt; @CommitStampEnd ORDER BY StreamId

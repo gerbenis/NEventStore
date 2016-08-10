@@ -73,7 +73,7 @@ namespace NEventStore.Persistence.Sql.SqlDialects
             get { return CommonSqlStatements.GetUniqueStreamIdsFrom; }
         }
 
-        public string GetUniqueStreamIdsFromTo
+        public virtual string GetUniqueStreamIdsFromTo
         {
             get { return CommonSqlStatements.GetUniqueStreamIdsFromTo; }
         }

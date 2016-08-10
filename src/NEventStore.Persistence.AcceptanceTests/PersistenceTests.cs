@@ -1011,6 +1011,12 @@ namespace NEventStore.Persistence.AcceptanceTests
         {
             _streamIds.ShouldNotBeEmpty();
         }
+
+        [Fact]
+        public void stream_id_should_be_correct()
+        {
+            _streamIds.First().ShouldBe(streamId.ToString());
+        }
     }
 
     /*public class TransactionConcern : PersistenceEngineConcern
