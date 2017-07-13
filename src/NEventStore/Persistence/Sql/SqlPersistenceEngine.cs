@@ -220,7 +220,7 @@ namespace NEventStore.Persistence.Sql
                     {
                         query.PageSize = pageSize.Value;
                     }
-                    return query.ExecutePagedQuery(statement, (q, s) => { }).Select(x => x.StreamId());
+                    return query.ExecutePagedQuery(statement, (q, s) => { }).Select(x => x.GetString(0));
                 });
         }
 
