@@ -88,13 +88,13 @@ namespace NEventStore.Persistence.InMemory
             return _buckets.Values.SelectMany(b => b.GetUndispatchedCommits());
         }
 
-        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start)
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, int? pageSize = null)
         {
             ThrowWhenDisposed();
             return this[bucketId].GetUniqueStreamIds(start);
         }
 
-        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end)
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end, int? pageSize = null)
         {
             ThrowWhenDisposed();
             return this[bucketId].GetUniqueStreamIds(start, end);

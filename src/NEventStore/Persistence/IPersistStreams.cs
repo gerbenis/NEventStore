@@ -80,7 +80,7 @@ namespace NEventStore.Persistence
         /// <param name="bucketId">The bucket identifier.</param>
         /// <param name="start">The start.</param>
         /// <returns></returns>
-        IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start);
+        IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, int? pageSize = null);
 
         /// <summary>
         /// Gets the unique stream ids.
@@ -89,7 +89,7 @@ namespace NEventStore.Persistence
         /// <param name="start">The start.</param>
         /// <param name="end">The end.</param>
         /// <returns></returns>
-        IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end);
+        IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end, int? pageSize = null);
 
         /// <summary>
         ///     Marks the commit specified as dispatched.

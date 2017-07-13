@@ -191,7 +191,7 @@ namespace NEventStore.Persistence.Sql
                     .ToArray(); // avoid paging
         }
 
-        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start)
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, int? pageSize = null)
         {
             return ExecuteQuery(
                 query =>
@@ -199,11 +199,15 @@ namespace NEventStore.Persistence.Sql
                     string statement = _dialect.GetUniqueStreamIdsFrom;
                     query.AddParameter(_dialect.BucketId, bucketId, DbType.AnsiString);
                     query.AddParameter(_dialect.CommitStampStart, start);
+                    if (pageSize.HasValue)
+                    {
+                        query.PageSize = pageSize.Value;
+                    }
                     return query.ExecutePagedQuery(statement, (q, s) => { }).Select(x => x.GetString(0));
                 });
         }
 
-        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end)
+        public IEnumerable<string> GetUniqueStreamIds(string bucketId, DateTime start, DateTime end, int? pageSize = null)
         {
             return ExecuteQuery(
                 query =>
@@ -212,6 +216,10 @@ namespace NEventStore.Persistence.Sql
                     query.AddParameter(_dialect.BucketId, bucketId, DbType.AnsiString);
                     query.AddParameter(_dialect.CommitStampStart, start);
                     query.AddParameter(_dialect.CommitStampEnd, end);
+                    if (pageSize.HasValue)
+                    {
+                        query.PageSize = pageSize.Value;
+                    }
                     return query.ExecutePagedQuery(statement, (q, s) => { }).Select(x => x.StreamId());
                 });
         }
